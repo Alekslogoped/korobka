@@ -41,22 +41,20 @@ h1{font-size:31px;margin:0;flex:1}
 
 #sentence{position:absolute;left:378px;top:505px;width:856px;min-height:43px;text-align:center;font-size:25px;font-weight:bold}
 .pool{position:absolute;left:378px;top:561px;width:856px;height:143px;display:flex;align-items:center;justify-content:space-evenly;background:#ffffff59;border:2px solid #ffffffa0;border-radius:27px}
-.gift{--c:#e05d69;position:relative;display:block;width:116px;height:116px;padding:0;border:0;background:none;touch-action:none;user-select:none;transition:filter .15s}
+.gift{--c:#e05d69;position:relative;display:block;width:132px;height:132px;padding:0;border:0;background:none;touch-action:none;user-select:none;transition:filter .15s}
 .gift:hover{filter:brightness(1.06)}
-.gift.selected{outline:4px solid #244a99;outline-offset:7px;border-radius:13px}
+.gift.selected{outline:4px solid #244a99;outline-offset:2px;border-radius:16px}
 .gift.used{visibility:hidden}
-.box{position:absolute;left:12px;right:12px;top:39px;bottom:0;background:var(--c);border:2px solid #00000019;border-radius:3px 3px 11px 11px;box-shadow:inset -10px 0 #0000000b,0 6px 0 #00000010}
-.ribbon{position:absolute;left:calc(50% - 9px);top:39px;bottom:0;width:18px;background:#ffe6a9}
-.lid{position:absolute;left:4px;right:4px;top:27px;height:23px;background:var(--c);border:2px solid #00000019;border-radius:6px;z-index:3;transition:transform .45s,opacity .4s}
-.lid:after{content:"";position:absolute;left:calc(50% - 9px);width:18px;height:19px;background:#ffe6a9}
-.bow{position:absolute;left:50%;top:8px;z-index:4;transition:transform .45s,opacity .4s}
-.bow:before,.bow:after{content:"";position:absolute;width:27px;height:21px;border:7px solid #ffe6a9;border-radius:65% 65% 0 65%;left:-26px;transform:rotate(12deg)}
-.bow:after{left:-1px;transform:scaleX(-1) rotate(12deg)}
-.prize{position:absolute;left:0;right:0;top:-15px;font-size:62px;line-height:1.15;z-index:2;opacity:0;transform:translateY(40px);transition:transform .5s,opacity .35s;pointer-events:none}
-.gift.open .lid,.gift.open .bow{transform:translateY(-68px) rotate(-15deg);opacity:0}
-.gift.open .prize{opacity:1;transform:translateY(0)}
-.gift.ready .bow{animation:wiggle 1.7s infinite}
-@keyframes wiggle{0%,75%,100%{rotate:0deg}80%{rotate:8deg}90%{rotate:-8deg}}
+.gift-image{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;user-select:none;pointer-events:none}
+.gift-base{clip-path:inset(51% 0 0 0);z-index:3}
+.gift-top{clip-path:inset(0 0 49% 0);z-index:4;transform-origin:50% 51%;transition:transform .5s ease,opacity .4s ease}
+.gift-mouth{position:absolute;left:12.5%;right:12.5%;top:48%;height:8%;border:2px solid var(--c);border-radius:50%;background:#80502c;opacity:0;transition:opacity .25s;z-index:1;pointer-events:none}
+.prize{position:absolute;left:0;right:0;top:8px;font-size:62px;line-height:1.15;z-index:2;opacity:0;transform:translateY(38px) scale(.7);transition:transform .5s ease,opacity .35s ease;pointer-events:none}
+.gift.open .gift-top{animation:none;transform:translateY(-66px) rotate(-11deg);opacity:0}
+.gift.open .gift-mouth{opacity:1}
+.gift.open .prize{opacity:1;transform:translateY(0) scale(1)}
+.gift.ready .gift-top{animation:gift-wiggle 2s infinite}
+@keyframes gift-wiggle{0%,75%,100%{rotate:0deg}82%{rotate:1.5deg}91%{rotate:-1.5deg}}
 .ghost{position:fixed!important;z-index:1000;pointer-events:none;transform:none!important;filter:drop-shadow(0 10px 10px #0003)}
 .bottom-controls{position:absolute;left:45px;top:587px;width:280px;display:grid;gap:17px}
 #next{background:#ffe4a1;border-color:#d4b56c;box-shadow:0 4px #d4b56c;font-size:23px}
@@ -70,6 +68,10 @@ h1{font-size:31px;margin:0;flex:1}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 <link rel="preload" as="image" href="assets/roma-v1.webp">
+<link rel="preload" as="image" href="assets/gift-red-v1.webp">
+<link rel="preload" as="image" href="assets/gift-blue-v1.webp">
+<link rel="preload" as="image" href="assets/gift-green-v1.webp">
+<link rel="preload" as="image" href="assets/gift-yellow-v1.webp">
 </head>
 <body>
 <main id="frame" aria-label="Игра Подарки для друзей">
@@ -158,7 +160,8 @@ function gift(color,slot=null){
   b.type='button';b.className='gift';b.style.setProperty('--c',colors[color].hex);
   b.dataset.color=color;
   b.setAttribute('aria-label',colors[color].name+' подарок');
-  b.innerHTML='<span class="prize"></span><span class="box"></span><span class="ribbon"></span><span class="lid"></span><span class="bow"></span>';
+  const imageSrc='assets/gift-'+color+'-v1.webp';
+  b.innerHTML='<span class="gift-mouth"></span><span class="prize"></span><img class="gift-image gift-base" src="'+imageSrc+'" alt="" draggable="false"><img class="gift-image gift-top" src="'+imageSrc+'" alt="" draggable="false">';
   if(slot===null){
     b.addEventListener('pointerdown',e=>startDrag(e,color,b));
     b.addEventListener('click',e=>{if(e.detail===0)select(color)});
@@ -178,7 +181,7 @@ function select(color){
 function startDrag(e,color,button){
   if(e.button!==0||placed.includes(color)||!$('help').hidden||!$('finish').hidden)return;
   e.preventDefault();
-  drag={id:e.pointerId,color,button,x:e.clientX,y:e.clientY,moved:false};
+  drag={id:e.pointerId,color,button,x:e.clientX,y:e.clientY,half:button.offsetWidth/2,moved:false};
   button.setPointerCapture(e.pointerId);
 }
 window.addEventListener('pointermove',e=>{
@@ -192,7 +195,7 @@ window.addEventListener('pointermove',e=>{
     ghost.style.setProperty('transform',`scale(${scale})`,'important');
     document.body.appendChild(ghost);
   }
-  if(ghost){ghost.style.left=e.clientX-58*drag.scale+'px';ghost.style.top=e.clientY-58*drag.scale+'px'}
+  if(ghost){ghost.style.left=e.clientX-drag.half*drag.scale+'px';ghost.style.top=e.clientY-drag.half*drag.scale+'px'}
 });
 window.addEventListener('pointerup',e=>{
   if(!drag||e.pointerId!==drag.id)return;
