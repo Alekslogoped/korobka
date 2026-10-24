@@ -27,17 +27,18 @@ h1{font-size:31px;margin:0;flex:1}
 
 
 .guest-name{position:absolute;left:50%;bottom:-50px;transform:translateX(-50%);font-size:27px;font-weight:bold;line-height:1.1;background:#fffef2ef;border:2px solid white;border-radius:16px;padding:6px 24px}
-#instruction{position:absolute;left:378px;top:119px;width:856px;min-height:105px;padding:20px 27px;background:#ffffffdf;border:2px solid white;border-radius:24px;font-size:25px;line-height:1.35;display:flex;align-items:center}
-.table{position:absolute;left:378px;top:280px;width:856px;height:210px}
-.slots{position:absolute;left:12px;right:12px;top:0;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;z-index:2}
+#instruction{position:absolute;left:378px;top:112px;width:856px;min-height:76px;padding:18px 27px;background:#ffffffdf;border:2px solid white;border-radius:24px;font-size:24px;line-height:1.25;display:flex;align-items:center}
+.table{position:absolute;left:378px;top:280px;width:856px;height:286px}
+.table-art{position:absolute;left:0;top:0;width:100%;height:auto;display:block;z-index:1;pointer-events:none;user-select:none}
+.slots{position:absolute;left:38px;right:38px;top:-72px;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;z-index:2}
 .slot{height:157px;position:relative;background:#ffffff69;border:3px dashed #9eb5bd;border-radius:20px;cursor:pointer}
 .slot:before{content:attr(data-number);position:absolute;left:9px;top:6px;font-size:18px;opacity:.65}
 .slot.filled{border:3px solid #ffffff85;background:#ffffff25}
 .slot .gift{position:absolute;left:50%;bottom:6px;transform:translateX(-50%)}
-.top{position:absolute;left:0;right:0;top:143px;height:25px;border-radius:14px;background:#e6be83;border:3px solid #bd9461;z-index:3;pointer-events:none}
-.cloth{position:absolute;left:15px;right:15px;top:165px;height:37px;border-radius:0 0 20px 20px;background:#fff8e4;border-bottom:7px solid #eacb96}
-.leg{position:absolute;width:18px;height:51px;background:#bc9365;top:190px;border-radius:0 0 8px 8px}
-.leg.left{left:50px}.leg.right{right:50px}
+
+
+
+
 #sentence{position:absolute;left:378px;top:505px;width:856px;min-height:43px;text-align:center;font-size:25px;font-weight:bold}
 .pool{position:absolute;left:378px;top:561px;width:856px;height:143px;display:flex;align-items:center;justify-content:space-evenly;background:#ffffff59;border:2px solid #ffffffa0;border-radius:27px}
 .gift{--c:#e05d69;position:relative;display:block;width:116px;height:116px;padding:0;border:0;background:none;touch-action:none;user-select:none;transition:filter .15s}
@@ -86,8 +87,7 @@ h1{font-size:31px;margin:0;flex:1}
   <div id="instruction" role="status" aria-live="polite"></div>
   <div class="table">
     <div id="slots" class="slots"></div>
-    <div class="top"></div><div class="cloth"></div>
-    <div class="leg left"></div><div class="leg right"></div>
+    <img class="table-art" src="assets/festive-table-v1.webp" alt="" aria-hidden="true" draggable="false">
   </div>
   <div id="sentence" aria-live="polite"></div>
   <div id="pool" class="pool" aria-label="Подарки на полянке"></div>
