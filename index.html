@@ -1,1 +1,273 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подарки для друзей</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#e4edf6;font-family:Arial,sans-serif;color:#243b66;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:4px solid #304ea5;outline-offset:5px}
+#frame{position:relative;overflow:hidden;border-radius:24px;box-shadow:0 12px 45px #233b6630}
+#game{position:absolute;width:1280px;height:720px;transform-origin:top left;overflow:hidden;background:linear-gradient(#e6f5ff 0%,#f6fbff 63%,#d4edb8 63%,#bade98 100%)}
+#game:before{content:"☁️";position:absolute;font-size:95px;left:1010px;top:78px;opacity:.65}
+.header{position:absolute;inset:22px 30px auto;display:flex;align-items:center;gap:20px}
+h1{font-size:31px;margin:0;flex:1}
+.levels{display:flex;gap:9px}
+.dot{width:35px;height:35px;display:grid;place-items:center;border-radius:50%;background:#ffffffc9;font-weight:bold;border:2px solid #abc2df}
+.dot.active{background:#4566af;color:white;border-color:#4566af}
+.dot.done{background:#d5ebba;border-color:#80ab59}
+.control{border:2px solid #c4d1e5;background:white;border-radius:16px;padding:12px 17px;font-size:19px;font-weight:bold;box-shadow:0 4px #c4d1e5}
+.guest{position:absolute;left:36px;top:132px;width:300px;height:365px;text-align:center;background:#ffffffa8;border:3px solid white;border-radius:36px}
+.child{font-size:158px;line-height:1.3;margin-top:7px}
+.sample{position:absolute;left:12px;right:12px;top:174px;height:94px;background:#fffef7;border:5px solid #e9c98d;border-radius:16px;display:flex;align-items:center;justify-content:space-evenly;box-shadow:0 7px 0 #0000000b}
+.mini{position:relative;width:44px;height:42px;background:var(--c);border-radius:5px;border:2px solid #00000015}
+.mini:before{content:"";position:absolute;left:16px;top:-2px;width:9px;height:42px;background:#ffe9b4}
+.mini:after{content:"🎀";position:absolute;left:7px;top:-21px;font-size:24px}
+.guest-name{position:absolute;left:0;right:0;bottom:24px;font-size:32px;font-weight:bold}
+#instruction{position:absolute;left:378px;top:119px;width:856px;min-height:105px;padding:20px 27px;background:#ffffffdf;border:2px solid white;border-radius:24px;font-size:25px;line-height:1.35;display:flex;align-items:center}
+.table{position:absolute;left:378px;top:280px;width:856px;height:210px}
+.slots{position:absolute;left:12px;right:12px;top:0;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;z-index:2}
+.slot{height:157px;position:relative;background:#ffffff69;border:3px dashed #9eb5bd;border-radius:20px;cursor:pointer}
+.slot:before{content:attr(data-number);position:absolute;left:9px;top:6px;font-size:18px;opacity:.65}
+.slot.filled{border:3px solid #ffffff85;background:#ffffff25}
+.slot .gift{position:absolute;left:50%;bottom:6px;transform:translateX(-50%)}
+.top{position:absolute;left:0;right:0;top:143px;height:25px;border-radius:14px;background:#e6be83;border:3px solid #bd9461;z-index:3;pointer-events:none}
+.cloth{position:absolute;left:15px;right:15px;top:165px;height:37px;border-radius:0 0 20px 20px;background:#fff8e4;border-bottom:7px solid #eacb96}
+.leg{position:absolute;width:18px;height:51px;background:#bc9365;top:190px;border-radius:0 0 8px 8px}
+.leg.left{left:50px}.leg.right{right:50px}
+#sentence{position:absolute;left:378px;top:505px;width:856px;min-height:43px;text-align:center;font-size:25px;font-weight:bold}
+.pool{position:absolute;left:378px;top:561px;width:856px;height:143px;display:flex;align-items:center;justify-content:space-evenly;background:#ffffff59;border:2px solid #ffffffa0;border-radius:27px}
+.gift{--c:#e05d69;position:relative;display:block;width:116px;height:116px;padding:0;border:0;background:none;touch-action:none;user-select:none;transition:filter .15s}
+.gift:hover{filter:brightness(1.06)}
+.gift.selected{outline:4px solid #244a99;outline-offset:7px;border-radius:13px}
+.gift.used{visibility:hidden}
+.box{position:absolute;left:12px;right:12px;top:39px;bottom:0;background:var(--c);border:2px solid #00000019;border-radius:3px 3px 11px 11px;box-shadow:inset -10px 0 #0000000b,0 6px 0 #00000010}
+.ribbon{position:absolute;left:calc(50% - 9px);top:39px;bottom:0;width:18px;background:#ffe6a9}
+.lid{position:absolute;left:4px;right:4px;top:27px;height:23px;background:var(--c);border:2px solid #00000019;border-radius:6px;z-index:3;transition:transform .45s,opacity .4s}
+.lid:after{content:"";position:absolute;left:calc(50% - 9px);width:18px;height:19px;background:#ffe6a9}
+.bow{position:absolute;left:50%;top:8px;z-index:4;transition:transform .45s,opacity .4s}
+.bow:before,.bow:after{content:"";position:absolute;width:27px;height:21px;border:7px solid #ffe6a9;border-radius:65% 65% 0 65%;left:-26px;transform:rotate(12deg)}
+.bow:after{left:-1px;transform:scaleX(-1) rotate(12deg)}
+.prize{position:absolute;left:0;right:0;top:-15px;font-size:62px;line-height:1.15;z-index:2;opacity:0;transform:translateY(40px);transition:transform .5s,opacity .35s;pointer-events:none}
+.gift.open .lid,.gift.open .bow{transform:translateY(-68px) rotate(-15deg);opacity:0}
+.gift.open .prize{opacity:1;transform:translateY(0)}
+.gift.ready .bow{animation:wiggle 1.7s infinite}
+@keyframes wiggle{0%,75%,100%{rotate:0deg}80%{rotate:8deg}90%{rotate:-8deg}}
+.ghost{position:fixed!important;z-index:1000;pointer-events:none;transform:none!important;filter:drop-shadow(0 10px 10px #0003)}
+.bottom-controls{position:absolute;left:45px;top:540px;width:280px;display:grid;gap:17px}
+#next{background:#ffe4a1;border-color:#d4b56c;box-shadow:0 4px #d4b56c;font-size:23px}
+[hidden]{display:none!important}
+.overlay{position:absolute;inset:0;background:#243b6670;z-index:30;display:grid;place-items:center}
+.dialog{background:#fffef8;width:710px;border:5px solid white;border-radius:32px;padding:33px 38px;box-shadow:0 15px 45px #0003;font-size:24px;line-height:1.45}
+.dialog h2{margin:0 0 16px;font-size:32px}
+.dialog p{margin:14px 0}
+.dialog .control{display:block;margin:24px auto 0}
+.final{text-align:center}.party{font-size:85px}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main id="frame" aria-label="Игра Подарки для друзей">
+<div id="game">
+  <header class="header">
+    <h1>🎁 Подарки для друзей</h1>
+    <div id="levels" class="levels" aria-label="Уровни"></div>
+    <button id="helpButton" class="control">Как играть</button>
+    <button id="restartButton" class="control">Сначала</button>
+  </header>
+  <section class="guest" aria-label="Персонаж и образец">
+    <div id="child" class="child" aria-hidden="true"></div>
+    <div id="sample" class="sample" aria-label="Порядок цветов"></div>
+    <div id="guestName" class="guest-name"></div>
+  </section>
+  <div id="instruction" role="status" aria-live="polite"></div>
+  <div class="table">
+    <div id="slots" class="slots"></div>
+    <div class="top"></div><div class="cloth"></div>
+    <div class="leg left"></div><div class="leg right"></div>
+  </div>
+  <div id="sentence" aria-live="polite"></div>
+  <div id="pool" class="pool" aria-label="Подарки на полянке"></div>
+  <div class="bottom-controls">
+    <button id="next" class="control" hidden>Дальше ➜</button>
+    <button id="clear" class="control">Расставить заново</button>
+  </div>
+  <div id="help" class="overlay" hidden>
+    <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <h2 id="helpTitle">Как играть</h2>
+      <p>Посмотри на карточку у ребёнка. Расставь подарки на столе в таком же порядке — слева направо.</p>
+      <p>Перетаскивай коробки или нажми на подарок, а затем на место на столе.</p>
+      <p>Когда соберёшь все четыре подарка, нажимай на коробки и называй сюрпризы целым предложением.</p>
+      <button id="closeHelp" class="control">Понятно!</button>
+    </section>
+  </div>
+  <div id="finish" class="overlay" hidden>
+    <section class="dialog final" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
+      <div class="party">🎉🎁🎈</div>
+      <h2 id="finishTitle">Все подарки открыты!</h2>
+      <p>Ты помог всем пяти друзьям!</p>
+      <button id="playAgain" class="control">Играть ещё раз</button>
+    </section>
+  </div>
+</div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const colors = {
+  red:{hex:'#eb5864',name:'красный',in:'красной'},
+  blue:{hex:'#4b8ce3',name:'синий',in:'синей'},
+  green:{hex:'#65b963',name:'зелёный',in:'зелёной'},
+  yellow:{hex:'#f4d348',name:'жёлтый',in:'жёлтой'}
+};
+const levels = [
+  {name:'Рома',owner:'Ромы',face:'👦🏻',order:['red','blue','green','yellow'],prizes:[['баран','🐏'],['барабан','🥁'],['робот','🤖'],['ракета','🚀']]},
+  {name:'Ира',owner:'Иры',face:'👧🏼',order:['yellow','green','red','blue'],prizes:[['рыба','🐟'],['жираф','🦒'],['гитара','🎸'],['трактор','🚜']]},
+  {name:'Артём',owner:'Артёма',face:'👦🏽',order:['green','red','yellow','blue'],prizes:[['тигр','🐅'],['корова','🐄'],['грузовик','🚚'],['карандаш','✏️']]},
+  {name:'Рая',owner:'Раи',face:'👧🏻',order:['blue','yellow','green','red'],prizes:[['краб','🦀'],['ворона','🐦‍⬛'],['помидор','🍅'],['гармошка','🪗']]},
+  {name:'Марк',owner:'Марка',face:'👦🏼',order:['red','green','blue','yellow'],prizes:[['крокодил','🐊'],['динозавр','🦕'],['паровоз','🚂'],['вертолёт','🚁']]}
+];
+let levelIndex=0, placed=[null,null,null,null], opened=[false,false,false,false];
+let selected=null, drag=null, ghost=null, messageTimer=null;
+function shuffle(list){
+  const a=[...list];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
+  return a;
+}
+function resize(){
+  const scale=Math.min(innerWidth/1280,innerHeight/720,1.6);
+  $('frame').style.width=1280*scale+'px';
+  $('frame').style.height=720*scale+'px';
+  $('game').style.transform=`scale(${scale})`;
+}
+function allPlaced(){return placed.every(Boolean)}
+function instruction(){
+  $('instruction').textContent=allPlaced()
+    ? 'Подарки собраны! Открывай коробки и составляй предложения.'
+    : 'Расставь подарки по образцу: слева направо.';
+}
+function say(text){
+  clearTimeout(messageTimer);$('instruction').textContent=text;
+  messageTimer=setTimeout(instruction,2200);
+}
+function gift(color,slot=null){
+  const b=document.createElement('button');
+  b.type='button';b.className='gift';b.style.setProperty('--c',colors[color].hex);
+  b.dataset.color=color;
+  b.setAttribute('aria-label',colors[color].name+' подарок');
+  b.innerHTML='<span class="prize"></span><span class="box"></span><span class="ribbon"></span><span class="lid"></span><span class="bow"></span>';
+  if(slot===null){
+    b.addEventListener('pointerdown',e=>startDrag(e,color,b));
+    b.addEventListener('click',e=>{if(e.detail===0)select(color)});
+  }else{
+    b.addEventListener('click',e=>{e.stopPropagation();openGift(slot)});
+  }
+  return b;
+}
+function select(color){
+  if(placed.includes(color))return;
+  selected=selected===color?null:color;
+  document.querySelectorAll('#pool .gift').forEach(b=>{
+    b.classList.toggle('selected',b.dataset.color===selected);
+    b.setAttribute('aria-pressed',String(b.dataset.color===selected));
+  });
+}
+function startDrag(e,color,button){
+  if(e.button!==0||placed.includes(color)||!$('help').hidden||!$('finish').hidden)return;
+  e.preventDefault();
+  drag={id:e.pointerId,color,button,x:e.clientX,y:e.clientY,moved:false};
+  button.setPointerCapture(e.pointerId);
+}
+window.addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  if(!drag.moved&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){
+    drag.moved=true;ghost=drag.button.cloneNode(true);
+    ghost.classList.remove('selected');ghost.classList.add('ghost');
+    ghost.setAttribute('aria-hidden','true');ghost.tabIndex=-1;
+    const scale=$('frame').getBoundingClientRect().width/1280;
+    drag.scale=scale;ghost.style.transformOrigin='top left';
+    ghost.style.setProperty('transform',`scale(${scale})`,'important');
+    document.body.appendChild(ghost);
+  }
+  if(ghost){ghost.style.left=e.clientX-58*drag.scale+'px';ghost.style.top=e.clientY-58*drag.scale+'px'}
+});
+window.addEventListener('pointerup',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const d=drag;cancelDrag();
+  if(d.moved){
+    const target=document.elementFromPoint(e.clientX,e.clientY)?.closest('.slot');
+    if(target)place(d.color,Number(target.dataset.slot));
+  }else select(d.color);
+});
+function cancelDrag(){ghost?.remove();ghost=null;drag=null}
+window.addEventListener('pointercancel',cancelDrag);
+window.addEventListener('blur',cancelDrag);
+function place(color,index){
+  if(placed.includes(color)||placed[index]||allPlaced())return;
+  if(levels[levelIndex].order[index]!==color){say('Посмотри на карточку: здесь нужен другой цвет.');return}
+  placed[index]=color;selected=null;
+  const slot=$('slots').children[index];slot.classList.add('filled');
+  slot.appendChild(gift(color,index));slot.setAttribute('aria-label','Место '+(index+1)+', '+colors[color].name+' подарок');
+  document.querySelectorAll('#pool .gift').forEach(b=>{
+    b.classList.remove('selected');b.setAttribute('aria-pressed','false');
+    if(placed.includes(b.dataset.color)){b.classList.add('used');b.disabled=true}
+  });
+  clearTimeout(messageTimer);instruction();
+  if(allPlaced()){
+    document.querySelectorAll('#slots .gift').forEach(b=>b.classList.add('ready'));
+    $('sentence').textContent='Нажми на подарок 🎁';
+  }
+}
+function openGift(index){
+  if(!allPlaced()){say('Сначала расставь все четыре подарка по образцу.');return}
+  const level=levels[levelIndex], [word,emoji]=level.prizes[index];
+  opened[index]=true;
+  const b=$('slots').children[index].querySelector('.gift');
+  b.querySelector('.prize').textContent=emoji;b.classList.remove('ready');b.classList.add('open');
+  const phrase=`У ${level.owner} в ${colors[placed[index]].in} коробке ${word}.`;
+  b.setAttribute('aria-label',phrase);$('sentence').textContent=phrase;
+  if(opened.every(Boolean)){
+    $('next').hidden=false;
+    $('next').textContent=levelIndex===levels.length-1?'Завершить ★':'Дальше ➜';
+  }
+}
+function loadLevel(){
+  clearTimeout(messageTimer);cancelDrag();selected=null;
+  placed=[null,null,null,null];opened=[false,false,false,false];
+  const level=levels[levelIndex];
+  $('finish').hidden=true;$('next').hidden=true;$('sentence').textContent='';
+  $('child').textContent=level.face;$('guestName').textContent=level.name;
+  $('levels').innerHTML=levels.map((_,i)=>`<span class="dot ${i===levelIndex?'active':i<levelIndex?'done':''}" ${i===levelIndex?'aria-current="step"':''}>${i<levelIndex?'✓':i+1}</span>`).join('');
+  $('sample').innerHTML=level.order.map(c=>`<span class="mini" style="--c:${colors[c].hex}" aria-hidden="true"></span>`).join('');
+  $('sample').setAttribute('aria-label','Образец слева направо: '+level.order.map(c=>colors[c].name).join(', '));
+  $('slots').replaceChildren();$('pool').replaceChildren();
+  for(let i=0;i<4;i++){
+    const slot=document.createElement('div');slot.className='slot';slot.dataset.slot=i;slot.dataset.number=i+1;
+    slot.tabIndex=0;slot.setAttribute('role','group');slot.setAttribute('aria-label','Место '+(i+1));
+    const activate=()=>{if(selected)place(selected,i);else if(!placed[i])say('Выбери подарок на полянке и нажми на место на столе.')};
+    slot.addEventListener('click',activate);
+    slot.addEventListener('keydown',e=>{if(e.target===slot&&(e.key==='Enter'||e.key===' ')){e.preventDefault();activate()}});
+    $('slots').appendChild(slot);
+  }
+  let poolOrder=shuffle(Object.keys(colors));
+  if(poolOrder.every((c,i)=>c===level.order[i]))poolOrder.push(poolOrder.shift());
+  poolOrder.forEach(c=>$('pool').appendChild(gift(c)));
+  instruction();
+}
+function restart(){levelIndex=0;$('help').hidden=true;loadLevel()}
+$('next').onclick=()=>{
+  if(!opened.every(Boolean))return;
+  if(levelIndex<levels.length-1){levelIndex++;loadLevel()}
+  else{$('finish').hidden=false;$('playAgain').focus()}
+};
+$('restartButton').onclick=restart;$('playAgain').onclick=restart;
+$('clear').onclick=loadLevel;
+$('helpButton').onclick=()=>{cancelDrag();$('help').hidden=false;$('closeHelp').focus()};
+$('closeHelp').onclick=()=>{$('help').hidden=true;$('helpButton').focus()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('help').hidden)$('closeHelp').click()});
+window.addEventListener('resize',resize);
+resize();loadLevel();
+</script>
+</body>
+</html>
