@@ -62,13 +62,19 @@ h1{font-size:32px;font-weight:900;line-height:1.15;margin:0;flex:1}
 @keyframes gift-wiggle{0%,75%,100%{rotate:0deg}82%{rotate:1.5deg}91%{rotate:-1.5deg}}
 .ghost{position:fixed!important;z-index:1000;pointer-events:none;transform:none!important;filter:drop-shadow(0 10px 10px #0003)}
 .bottom-controls{position:absolute;left:45px;top:587px;width:280px;display:grid;gap:17px}
-#next,#playAgain{background:#ffe4a1;border-color:#d4b56c;box-shadow:0 4px #d4b56c;font-size:23px}
+#next,#playAgain,#celebrationReplay{background:#ffe4a1;border-color:#d4b56c;box-shadow:0 4px #d4b56c;font-size:23px}
 [hidden]{display:none!important}
 .overlay{position:absolute;inset:0;background:#243b6670;z-index:30;display:grid;place-items:center}
 .dialog{background:#fffef8;width:710px;border:5px solid white;border-radius:32px;padding:33px 38px;box-shadow:0 15px 45px #0003;font-size:24px;line-height:1.45}
 .dialog h2{margin:0 0 16px;font-size:32px}
 .dialog p{margin:14px 0}
 .dialog .control{display:block;margin:24px auto 0}
+.celebration-card{position:relative;width:960px;padding:16px;background:#fffef8;border:3px solid white;border-radius:28px;box-shadow:0 15px 45px #0003;text-align:center;animation:party-enter .4s ease-out}
+#celebrationTitle{font-size:30px;font-weight:900;line-height:1.15;margin:0 44px 12px}
+.celebration-image{display:block;width:100%;height:auto;border-radius:16px}
+#celebrationReplay{margin-top:12px;min-width:260px}
+.celebration-close{position:absolute;right:10px;top:8px;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#e6eef7;font-size:30px;line-height:1}
+@keyframes party-enter{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 <link rel="preload" as="image" href="assets/roma-v1.webp">
@@ -110,6 +116,14 @@ h1{font-size:32px;font-weight:900;line-height:1.15;margin:0;flex:1}
       <button id="closeHelp" class="control">Понятно!</button>
     </section>
   </div>
+  <div id="celebration" class="overlay" hidden>
+    <section class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="celebrationTitle">
+      <button id="celebrationClose" class="celebration-close" aria-label="Вернуться к подаркам">×</button>
+      <h2 id="celebrationTitle">Все друзья на празднике!</h2>
+      <img id="celebrationImage" class="celebration-image" src="assets/friends-party-v1.webp" alt="Рома, Ира, Артём, Рая и Марк вместе радуются на праздничной полянке с подарками и воздушными шариками." decoding="async" fetchpriority="low" draggable="false">
+      <button id="celebrationReplay" class="control">Играть снова</button>
+    </section>
+  </div>
 </div>
 </main>
 <script>
@@ -135,7 +149,7 @@ function getToyImage(key){
 }
 const characterImages=["roma","ira","artyom","raya","mark"];
 let levelIndex=0, placed=[null,null,null,null], opened=[false,false,false,false];
-let selected=null, drag=null, ghost=null, messageTimer=null;
+let selected=null, drag=null, ghost=null, messageTimer=null, partyTimer=null;
 function shuffle(list){
   const a=[...list];
   for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}
@@ -181,7 +195,7 @@ function select(color){
   });
 }
 function startDrag(e,color,button){
-  if(e.button!==0||placed.includes(color)||!$('help').hidden)return;
+  if(e.button!==0||placed.includes(color)||!$('help').hidden||!$('celebration').hidden)return;
   e.preventDefault();
   drag={id:e.pointerId,color,button,x:e.clientX,y:e.clientY,half:button.offsetWidth/2,moved:false};
   button.setPointerCapture(e.pointerId);
@@ -229,6 +243,7 @@ function place(color,index){
 function openGift(index){
   if(!allPlaced()){say('Сначала расставь все четыре подарка по образцу.');return}
   const level=levels[levelIndex], [word,toyKey]=level.prizes[index];
+  const newlyOpened=!opened[index];
   opened[index]=true;
   const b=$('slots').children[index].querySelector('.gift');
   const toy=getToyImage(toyKey).cloneNode();toy.alt='';toy.draggable=false;
@@ -244,11 +259,18 @@ function openGift(index){
     if(finished){
       const last=$('levels').lastElementChild;
       last.classList.remove('active');last.classList.add('done');last.textContent='✓';last.removeAttribute('aria-current');
+      if(newlyOpened){
+        clearTimeout(partyTimer);
+        partyTimer=setTimeout(()=>{
+          $('help').hidden=true;$('celebration').hidden=false;$('celebrationReplay').focus();partyTimer=null;
+        },1000);
+      }
     }
   }
 }
 function loadLevel(){
-  clearTimeout(messageTimer);cancelDrag();selected=null;
+  clearTimeout(messageTimer);clearTimeout(partyTimer);partyTimer=null;
+  $('celebration').hidden=true;cancelDrag();selected=null;
   placed=[null,null,null,null];opened=[false,false,false,false];
   const level=levels[levelIndex];
   level.prizes.forEach(([,key])=>getToyImage(key));
@@ -277,10 +299,17 @@ $('next').onclick=()=>{
   if(!opened.every(Boolean))return;
   if(levelIndex<levels.length-1){levelIndex++;loadLevel()}
 };
-$('restartButton').onclick=restart;$('playAgain').onclick=restart;
+$('restartButton').onclick=restart;$('playAgain').onclick=restart;$('celebrationReplay').onclick=restart;
+function closeCelebration(){clearTimeout(partyTimer);partyTimer=null;$('celebration').hidden=true;$('playAgain').focus()}
+$('celebrationClose').onclick=closeCelebration;
+$('celebration').addEventListener('keydown',e=>{
+  if(e.key!=='Tab')return;
+  if(e.shiftKey&&document.activeElement===$('celebrationClose')){e.preventDefault();$('celebrationReplay').focus()}
+  else if(!e.shiftKey&&document.activeElement===$('celebrationReplay')){e.preventDefault();$('celebrationClose').focus()}
+});
 $('helpButton').onclick=()=>{cancelDrag();$('help').hidden=false;$('closeHelp').focus()};
 $('closeHelp').onclick=()=>{$('help').hidden=true;$('helpButton').focus()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('help').hidden)$('closeHelp').click()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('celebration').hidden)closeCelebration();else if(e.key==='Escape'&&!$('help').hidden)$('closeHelp').click()});
 window.addEventListener('resize',resize);
 resize();loadLevel();
 </script>
