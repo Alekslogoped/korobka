@@ -27,7 +27,7 @@ h1{font-size:31px;margin:0;flex:1}
 
 
 .guest-name{position:absolute;left:50%;bottom:-50px;transform:translateX(-50%);font-size:27px;font-weight:bold;line-height:1.1;background:#fffef2ef;border:2px solid white;border-radius:16px;padding:6px 24px}
-#instruction{position:absolute;left:378px;top:112px;width:856px;min-height:76px;padding:18px 27px;background:#ffffffdf;border:2px solid white;border-radius:24px;font-size:24px;line-height:1.25;display:flex;align-items:center}
+#instruction{min-height:80px;padding:14px 16px;background:#ffffffdf;border:2px solid white;border-radius:20px;font-size:22px;line-height:1.25;display:flex;align-items:center;justify-content:center;text-align:center}
 .table{position:absolute;left:378px;top:280px;width:856px;height:286px}
 .table-art{position:absolute;left:0;top:0;width:100%;height:auto;display:block;z-index:1;pointer-events:none;user-select:none}
 .slots{position:absolute;left:38px;right:38px;top:-72px;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;z-index:2}
@@ -59,14 +59,13 @@ h1{font-size:31px;margin:0;flex:1}
 @keyframes gift-wiggle{0%,75%,100%{rotate:0deg}82%{rotate:1.5deg}91%{rotate:-1.5deg}}
 .ghost{position:fixed!important;z-index:1000;pointer-events:none;transform:none!important;filter:drop-shadow(0 10px 10px #0003)}
 .bottom-controls{position:absolute;left:45px;top:587px;width:280px;display:grid;gap:17px}
-#next{background:#ffe4a1;border-color:#d4b56c;box-shadow:0 4px #d4b56c;font-size:23px}
+#next,#playAgain{background:#ffe4a1;border-color:#d4b56c;box-shadow:0 4px #d4b56c;font-size:23px}
 [hidden]{display:none!important}
 .overlay{position:absolute;inset:0;background:#243b6670;z-index:30;display:grid;place-items:center}
 .dialog{background:#fffef8;width:710px;border:5px solid white;border-radius:32px;padding:33px 38px;box-shadow:0 15px 45px #0003;font-size:24px;line-height:1.45}
 .dialog h2{margin:0 0 16px;font-size:32px}
 .dialog p{margin:14px 0}
 .dialog .control{display:block;margin:24px auto 0}
-.final{text-align:center}.party{font-size:85px}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
 <link rel="preload" as="image" href="assets/roma-v1.webp">
@@ -88,7 +87,6 @@ h1{font-size:31px;margin:0;flex:1}
     <div id="child" class="child" aria-hidden="true"></div>
     <div id="guestName" class="guest-name"></div>
   </section>
-  <div id="instruction" role="status" aria-live="polite"></div>
   <div class="table">
     <div id="slots" class="slots"></div>
     <img class="table-art" src="assets/festive-table-v1.webp" alt="" aria-hidden="true" draggable="false">
@@ -96,8 +94,9 @@ h1{font-size:31px;margin:0;flex:1}
   <div id="sentence" aria-live="polite"></div>
   <div id="pool" class="pool" aria-label="Подарки на полянке"></div>
   <div class="bottom-controls">
+    <div id="instruction" role="status" aria-live="polite"></div>
     <button id="next" class="control" hidden>Дальше ➜</button>
-    <button id="clear" class="control">Расставить заново</button>
+    <button id="playAgain" class="control" hidden>Играть снова</button>
   </div>
   <div id="help" class="overlay" hidden>
     <section class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
@@ -106,14 +105,6 @@ h1{font-size:31px;margin:0;flex:1}
       <p>Перетаскивай коробки или нажми на подарок, а затем на место на столе.</p>
       <p>Когда соберёшь все четыре подарка, нажимай на коробки и называй сюрпризы целым предложением.</p>
       <button id="closeHelp" class="control">Понятно!</button>
-    </section>
-  </div>
-  <div id="finish" class="overlay" hidden>
-    <section class="dialog final" role="dialog" aria-modal="true" aria-labelledby="finishTitle">
-      <div class="party">🎉🎁🎈</div>
-      <h2 id="finishTitle">Все подарки открыты!</h2>
-      <p>Ты помог всем пяти друзьям!</p>
-      <button id="playAgain" class="control">Играть ещё раз</button>
     </section>
   </div>
 </div>
@@ -157,7 +148,7 @@ function allPlaced(){return placed.every(Boolean)}
 function instruction(){
   const complete=allPlaced();
   $('instruction').hidden=complete;
-  $('instruction').textContent=complete?'':'Расставь подарки по образцу: слева направо.';
+  $('instruction').textContent=complete?'':'Расставь подарки по образцу.';
 }
 function say(text){
   clearTimeout(messageTimer);$('instruction').hidden=false;$('instruction').textContent=text;
@@ -187,7 +178,7 @@ function select(color){
   });
 }
 function startDrag(e,color,button){
-  if(e.button!==0||placed.includes(color)||!$('help').hidden||!$('finish').hidden)return;
+  if(e.button!==0||placed.includes(color)||!$('help').hidden)return;
   e.preventDefault();
   drag={id:e.pointerId,color,button,x:e.clientX,y:e.clientY,half:button.offsetWidth/2,moved:false};
   button.setPointerCapture(e.pointerId);
@@ -244,8 +235,13 @@ function openGift(index){
   const phrase=`У ${level.owner} в ${colors[placed[index]].in} коробке ${word}.`;
   b.setAttribute('aria-label',phrase);$('sentence').textContent=phrase;
   if(opened.every(Boolean)){
-    $('next').hidden=false;
-    $('next').textContent=levelIndex===levels.length-1?'Завершить ★':'Дальше ➜';
+    const finished=levelIndex===levels.length-1;
+    $('next').hidden=finished;
+    $('playAgain').hidden=!finished;
+    if(finished){
+      const last=$('levels').lastElementChild;
+      last.classList.remove('active');last.classList.add('done');last.textContent='✓';last.removeAttribute('aria-current');
+    }
   }
 }
 function loadLevel(){
@@ -253,7 +249,7 @@ function loadLevel(){
   placed=[null,null,null,null];opened=[false,false,false,false];
   const level=levels[levelIndex];
   level.prizes.forEach(([,key])=>getToyImage(key));
-  $('finish').hidden=true;$('next').hidden=true;$('sentence').textContent='';
+  $('playAgain').hidden=true;$('next').hidden=true;$('sentence').textContent='';
   const portrait=document.createElement('img');
   portrait.src='assets/'+characterImages[levelIndex]+'-v1.webp';portrait.alt='';portrait.draggable=false;
   $('child').replaceChildren(portrait);$('guestName').textContent=level.name;
@@ -277,10 +273,8 @@ function restart(){levelIndex=0;$('help').hidden=true;loadLevel()}
 $('next').onclick=()=>{
   if(!opened.every(Boolean))return;
   if(levelIndex<levels.length-1){levelIndex++;loadLevel()}
-  else{$('finish').hidden=false;$('playAgain').focus()}
 };
 $('restartButton').onclick=restart;$('playAgain').onclick=restart;
-$('clear').onclick=loadLevel;
 $('helpButton').onclick=()=>{cancelDrag();$('help').hidden=false;$('closeHelp').focus()};
 $('closeHelp').onclick=()=>{$('help').hidden=true;$('helpButton').focus()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('help').hidden)$('closeHelp').click()});
