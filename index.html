@@ -70,10 +70,14 @@ h1{font-size:32px;font-weight:900;line-height:1.15;margin:0;flex:1}
 .dialog p{margin:14px 0}
 .dialog .control{display:block;margin:24px auto 0}
 .celebration-card{position:relative;width:960px;padding:16px;background:#fffef8;border:3px solid white;border-radius:28px;box-shadow:0 15px 45px #0003;text-align:center;animation:party-enter .4s ease-out}
-#celebrationTitle{font-size:30px;font-weight:900;line-height:1.15;margin:0 44px 12px}
+#celebrationTitle{font-size:52px;font-weight:900;line-height:1.1;margin:0 44px 14px;color:#ffe487;-webkit-text-stroke:1px #cf822c;paint-order:stroke fill;text-shadow:0 1px 0 #e7a53d,0 2px 0 #dc9435,0 3px 0 #d28830,0 4px 0 #c57a2c,0 5px 0 #b86c28,0 8px 10px #75482340}
 .celebration-image{display:block;width:100%;height:auto;border-radius:16px}
 #celebrationReplay{margin-top:12px;min-width:260px}
 .celebration-close{position:absolute;right:10px;top:8px;width:40px;height:40px;padding:0;border:0;border-radius:50%;background:#e6eef7;font-size:30px;line-height:1}
+.serpentine{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2}
+.confetti-piece{position:absolute;top:-60px;width:10px;height:18px;background:currentColor;border-radius:2px;opacity:0;animation:serpentine-fall linear infinite;will-change:transform}
+.confetti-piece.curl{width:18px;height:36px;background:none;border:4px solid currentColor;border-left-color:transparent;border-right-color:transparent;border-radius:50%}
+@keyframes serpentine-fall{0%{opacity:0;transform:translate3d(0,-30px,0) rotate(0deg)}8%,88%{opacity:1}100%{opacity:0;transform:translate3d(var(--drift),850px,0) rotate(var(--turn))}}
 @keyframes party-enter{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
 </style>
@@ -117,9 +121,10 @@ h1{font-size:32px;font-weight:900;line-height:1.15;margin:0;flex:1}
     </section>
   </div>
   <div id="celebration" class="overlay" hidden>
+    <div id="serpentine" class="serpentine" aria-hidden="true"></div>
     <section class="celebration-card" role="dialog" aria-modal="true" aria-labelledby="celebrationTitle">
       <button id="celebrationClose" class="celebration-close" aria-label="Вернуться к подаркам">×</button>
-      <h2 id="celebrationTitle">Все друзья на празднике!</h2>
+      <h2 id="celebrationTitle">Молодец!</h2>
       <img id="celebrationImage" class="celebration-image" src="assets/friends-party-v1.webp" alt="Рома, Ира, Артём, Рая и Марк вместе радуются на праздничной полянке с подарками и воздушными шариками." decoding="async" fetchpriority="low" draggable="false">
       <button id="celebrationReplay" class="control">Играть снова</button>
     </section>
@@ -262,7 +267,7 @@ function openGift(index){
       if(newlyOpened){
         clearTimeout(partyTimer);
         partyTimer=setTimeout(()=>{
-          $('help').hidden=true;$('celebration').hidden=false;$('celebrationReplay').focus();partyTimer=null;
+          $('help').hidden=true;startSerpentine();$('celebration').hidden=false;$('celebrationReplay').focus();partyTimer=null;
         },1000);
       }
     }
@@ -300,6 +305,18 @@ $('next').onclick=()=>{
   if(levelIndex<levels.length-1){levelIndex++;loadLevel()}
 };
 $('restartButton').onclick=restart;$('playAgain').onclick=restart;$('celebrationReplay').onclick=restart;
+function startSerpentine(){
+  const palette=['#f36585','#ffd54b','#63bd91','#63a8ee','#b58ae8','#ff9d51'];
+  const pieces=Array.from({length:64},(_,i)=>{
+    const piece=document.createElement('span');piece.className='confetti-piece'+(i%3===0?' curl':'');
+    piece.style.left=(Math.random()*100)+'%';piece.style.color=palette[i%palette.length];
+    piece.style.animationDuration=(4.5+Math.random()*2)+'s';piece.style.animationDelay=(Math.random()*2)+'s';
+    piece.style.setProperty('--drift',(Math.random()*160-80)+'px');
+    piece.style.setProperty('--turn',(Math.random()>.5?'':'-')+(360+Math.random()*720)+'deg');
+    return piece;
+  });
+  $('serpentine').replaceChildren(...pieces);
+}
 function closeCelebration(){clearTimeout(partyTimer);partyTimer=null;$('celebration').hidden=true;$('playAgain').focus()}
 $('celebrationClose').onclick=closeCelebration;
 $('celebration').addEventListener('keydown',e=>{
