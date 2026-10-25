@@ -4,21 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Подарки для друзей</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&amp;display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
-body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#e4edf6;font-family:Arial,sans-serif;color:#243b66;overflow:hidden}
+body{margin:0;min-height:100dvh;display:grid;place-items:center;background:#e4edf6;font-family:'Nunito','Arial',sans-serif;font-weight:600;color:#243b66;overflow:hidden}
 button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 button:focus-visible{outline:4px solid #304ea5;outline-offset:5px}
 #frame{position:relative;overflow:hidden;border-radius:24px;box-shadow:0 12px 45px #233b6630}
 #game{position:absolute;width:1280px;height:720px;transform-origin:top left;overflow:hidden;background:#e8f5df url("assets/festive-meadow-v1.webp") center/cover no-repeat}
 
 .header{position:absolute;inset:16px 26px auto;display:flex;align-items:center;gap:20px;background:#ffffffe6;border:1px solid white;border-radius:20px;padding:12px 16px}
-h1{font-size:31px;margin:0;flex:1}
+h1{font-size:32px;font-weight:900;line-height:1.15;margin:0;flex:1}
 .levels{display:flex;gap:9px}
 .dot{width:35px;height:35px;display:grid;place-items:center;border-radius:50%;background:#ffffffc9;font-weight:bold;border:2px solid #abc2df}
 .dot.active{background:#4566af;color:white;border-color:#4566af}
 .dot.done{background:#d5ebba;border-color:#80ab59}
-.control{border:2px solid #c4d1e5;background:white;border-radius:16px;padding:12px 17px;font-size:19px;font-weight:bold;box-shadow:0 4px #c4d1e5}
+.control{border:2px solid #c4d1e5;background:white;border-radius:16px;padding:12px 17px;font-size:19px;font-weight:800;line-height:1.2;box-shadow:0 4px #c4d1e5}
 .guest{position:absolute;left:17px;top:108px;width:338px;height:420px;text-align:center}
 .child{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;line-height:normal;margin:0}
 .child img{display:block;width:100%;height:100%;object-fit:contain;user-select:none;pointer-events:none}
@@ -26,8 +29,8 @@ h1{font-size:31px;margin:0;flex:1}
 
 
 
-.guest-name{position:absolute;left:50%;bottom:-50px;transform:translateX(-50%);font-size:27px;font-weight:bold;line-height:1.1;background:#fffef2ef;border:2px solid white;border-radius:16px;padding:6px 24px}
-#instruction{min-height:80px;padding:14px 16px;background:#ffffffdf;border:2px solid white;border-radius:20px;font-size:22px;line-height:1.25;display:flex;align-items:center;justify-content:center;text-align:center}
+.guest-name{position:absolute;left:50%;bottom:-50px;transform:translateX(-50%);font-size:27px;font-weight:900;line-height:1.1;background:#fffef2ef;border:2px solid white;border-radius:16px;padding:6px 24px}
+#instruction{min-height:80px;padding:14px 16px;background:#ffffffdf;border:2px solid white;border-radius:20px;font-size:22px;font-weight:700;line-height:1.25;display:flex;align-items:center;justify-content:center;text-align:center}
 .table{position:absolute;left:378px;top:280px;width:856px;height:286px}
 .table-art{position:absolute;left:0;top:0;width:100%;height:auto;display:block;z-index:1;pointer-events:none;user-select:none}
 .slots{position:absolute;left:38px;right:38px;top:-72px;display:grid;grid-template-columns:repeat(4,1fr);gap:15px;z-index:2}
@@ -40,7 +43,7 @@ h1{font-size:31px;margin:0;flex:1}
 
 
 
-#sentence{position:absolute;left:378px;top:505px;width:856px;min-height:43px;text-align:center;font-size:25px;font-weight:bold}
+#sentence{position:absolute;left:378px;top:505px;width:856px;min-height:43px;text-align:center;font-size:25px;font-weight:800;line-height:1.3}
 .pool{position:absolute;left:378px;top:561px;width:856px;height:143px;display:flex;align-items:center;justify-content:space-evenly;background:#ffffff59;border:2px solid #ffffffa0;border-radius:27px}
 .gift{--c:#e05d69;position:relative;display:block;width:132px;height:132px;padding:0;border:0;background:none;touch-action:none;user-select:none;transition:filter .15s}
 .gift:hover{filter:brightness(1.06)}
