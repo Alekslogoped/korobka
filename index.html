@@ -49,7 +49,8 @@ h1{font-size:31px;margin:0;flex:1}
 .gift-base{clip-path:inset(51% 0 0 0);z-index:3}
 .gift-top{clip-path:inset(0 0 49% 0);z-index:4;transform-origin:50% 51%;transition:transform .5s ease,opacity .4s ease}
 .gift-mouth{position:absolute;left:12.5%;right:12.5%;top:48%;height:8%;border:2px solid var(--c);border-radius:50%;background:#80502c;opacity:0;transition:opacity .25s;z-index:1;pointer-events:none}
-.prize{position:absolute;left:0;right:0;top:8px;font-size:62px;line-height:1.15;z-index:2;opacity:0;transform:translateY(38px) scale(.7);transition:transform .5s ease,opacity .35s ease;pointer-events:none}
+.prize{position:absolute;left:50%;top:-33px;width:144px;height:104px;margin-left:-72px;overflow:hidden;z-index:2;opacity:0;transform:translateY(38px) scale(.7);transition:transform .5s ease,opacity .35s ease;pointer-events:none}
+.prize img{position:absolute;max-width:none;display:block;pointer-events:none;user-select:none}
 .gift.open .gift-top{animation:none;transform:translateY(-66px) rotate(-11deg);opacity:0}
 .gift.open .gift-mouth{opacity:1}
 .gift.open .prize{opacity:1;transform:translateY(0) scale(1)}
@@ -125,12 +126,18 @@ const colors = {
   yellow:{hex:'#f4d348',name:'жёлтый',in:'жёлтой'}
 };
 const levels = [
-  {name:'Рома',owner:'Ромы',face:'👦🏻',order:['red','blue','green','yellow'],prizes:[['баран','🐏'],['барабан','🥁'],['робот','🤖'],['ракета','🚀']]},
-  {name:'Ира',owner:'Иры',face:'👧🏼',order:['yellow','green','red','blue'],prizes:[['рыба','🐟'],['жираф','🦒'],['гитара','🎸'],['трактор','🚜']]},
-  {name:'Артём',owner:'Артёма',face:'👦🏽',order:['green','red','yellow','blue'],prizes:[['тигр','🐅'],['корова','🐄'],['грузовик','🚚'],['карандаш','✏️']]},
-  {name:'Рая',owner:'Раи',face:'👧🏻',order:['blue','yellow','green','red'],prizes:[['краб','🦀'],['ворона','🐦‍⬛'],['помидор','🍅'],['гармошка','🪗']]},
-  {name:'Марк',owner:'Марка',face:'👦🏼',order:['red','green','blue','yellow'],prizes:[['крокодил','🐊'],['динозавр','🦕'],['паровоз','🚂'],['вертолёт','🚁']]}
+  {name:'Рома',owner:'Ромы',face:'👦🏻',order:['red','blue','green','yellow'],prizes:[['баран','ram'],['барабан','drum'],['робот','robot'],['ракета','rocket']]},
+  {name:'Ира',owner:'Иры',face:'👧🏼',order:['yellow','green','red','blue'],prizes:[['рыба','fish'],['жираф','giraffe'],['гитара','guitar'],['трактор','tractor']]},
+  {name:'Артём',owner:'Артёма',face:'👦🏽',order:['green','red','yellow','blue'],prizes:[['тигр','tiger'],['корова','cow'],['грузовик','truck'],['карандаш','pencil']]},
+  {name:'Рая',owner:'Раи',face:'👧🏻',order:['blue','yellow','green','red'],prizes:[['краб','crab'],['ворона','crow'],['помидор','tomato'],['гармошка','accordion']]},
+  {name:'Марк',owner:'Марка',face:'👦🏼',order:['red','green','blue','yellow'],prizes:[['крокодил','crocodile'],['динозавр','dinosaur'],['паровоз','locomotive'],['вертолёт','helicopter']]}
 ];
+const toyLayout={"ram":[117.281,117.281,13.032,-6.921],"drum":[132.268,132.268,3.335,-14.978],"robot":[111.849,111.849,14.871,-4.549],"rocket":[118.452,118.452,12.727,-7.935],"fish":[153.974,153.974,-6.338,-24.803],"giraffe":[110.992,110.992,14.158,-2.744],"guitar":[113.208,113.208,14.583,-5.326],"tractor":[131.733,131.733,4.663,-19.119],"tiger":[122.456,122.456,11.26,-9.961],"cow":[123.15,123.15,9.443,-10.508],"truck":[149.217,149.217,-4.096,-25.822],"pencil":[128.236,128.236,5.019,-11.351],"crab":[133.35,133.35,4.9,-16.057],"crow":[113.11,113.11,17.79,-4.871],"tomato":[140.686,140.686,1.433,-19.297],"accordion":[148.256,148.256,-2.601,-21.793],"crocodile":[152.128,152.128,-5.944,-25.564],"dinosaur":[142.376,142.376,0.472,-23.956],"locomotive":[124.443,124.443,7.695,-10.221],"helicopter":[135.286,135.286,4.141,-18.448]};
+const toyCache=new Map();
+function getToyImage(key){
+  if(!toyCache.has(key)){const image=new Image();image.src='assets/toys/'+key+'-v1.webp';toyCache.set(key,image);}
+  return toyCache.get(key);
+}
 const characterImages=["roma","ira","artyom","raya","mark"];
 let levelIndex=0, placed=[null,null,null,null], opened=[false,false,false,false];
 let selected=null, drag=null, ghost=null, messageTimer=null;
@@ -226,10 +233,13 @@ function place(color,index){
 }
 function openGift(index){
   if(!allPlaced()){say('Сначала расставь все четыре подарка по образцу.');return}
-  const level=levels[levelIndex], [word,emoji]=level.prizes[index];
+  const level=levels[levelIndex], [word,toyKey]=level.prizes[index];
   opened[index]=true;
   const b=$('slots').children[index].querySelector('.gift');
-  b.querySelector('.prize').textContent=emoji;b.classList.remove('ready');b.classList.add('open');
+  const toy=getToyImage(toyKey).cloneNode();toy.alt='';toy.draggable=false;
+  const [w,h,x,y]=toyLayout[toyKey];
+  Object.assign(toy.style,{width:w+'px',height:h+'px',left:x+'px',top:y+'px'});
+  b.querySelector('.prize').replaceChildren(toy);b.classList.remove('ready');b.classList.add('open');
   const phrase=`У ${level.owner} в ${colors[placed[index]].in} коробке ${word}.`;
   b.setAttribute('aria-label',phrase);$('sentence').textContent=phrase;
   if(opened.every(Boolean)){
@@ -241,6 +251,7 @@ function loadLevel(){
   clearTimeout(messageTimer);cancelDrag();selected=null;
   placed=[null,null,null,null];opened=[false,false,false,false];
   const level=levels[levelIndex];
+  level.prizes.forEach(([,key])=>getToyImage(key));
   $('finish').hidden=true;$('next').hidden=true;$('sentence').textContent='';
   const portrait=document.createElement('img');
   portrait.src='assets/'+characterImages[levelIndex]+'-v1.webp';portrait.alt='';portrait.draggable=false;
@@ -277,3 +288,4 @@ resize();loadLevel();
 </script>
 </body>
 </html>
+
